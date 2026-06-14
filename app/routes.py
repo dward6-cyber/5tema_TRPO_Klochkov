@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from app import db
-from app.models import Trip, Item
+from app.models import Trip, Item, User
 
 main_bp = Blueprint('main', __name__)
 
@@ -8,13 +8,17 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
+    if 'user_id' not in session:
+        return redirect(url_for('main.login')) # Защита от гостей
+        
+    user_id = session['user_id']
     search_query = request.args.get('search', '').strip()
+    
     if search_query:
-
-        #Реализация поиска
-        trips = Trip.query.filter(Trip.location.ilike(f"%{search_query}%")).all()
+        trips = Trip.query.filter_by(user_id=user_id).filter(Trip.location.ilike(f"%{search_query}%")).all()
     else:
-        trips = Trip.query.all()
+        trips = Trip.query.filter_by(user_id=user_id).all()
+        
     return render_template('index.html', trips=trips, search_query=search_query)
 
 @main_bp.route('/trip/add', methods=['POST'])
@@ -27,7 +31,7 @@ def add_trip():
     if not name or not dates or not location:
         return "Ошибка: Все поля должны быть заполнены", 400
 
-    new_trip = Trip(name=name, dates=dates, location=location)
+    new_trip = Trip(name=name, dates=dates, location=location, user_id=session['user_id'])
     db.session.add(new_trip)
     db.session.commit()
     return redirect(url_for('main.index'))
@@ -125,3 +129,44 @@ def copy_template(trip_id):
         db.session.commit()
         
     return redirect(url_for('main.trip_detail', trip_id=target_trip.id))
+
+#регистрация
+@main_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        #проверка. существует ли пользователь
+
+        if User.query.filter_by(username=username).first():
+            flash('Пользователь с таким логином уже существует', 'danger')
+            return redirect(url_for('main.register'))
+            
+        new_user = User(username=username, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Регистрация успешна! Теперь вы можете войти', 'success')
+        return redirect(url_for('main.login'))
+    return render_template('register.html')
+
+#вход
+@main_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        user = User.query.filter_by(username=username, password=password).first()
+        if user:
+            session['user_id'] = user.id
+            session['username'] = user.username
+            return redirect(url_for('main.index'))
+        return "Неверный логин или пароль", 401
+    return render_template('login.html')
+
+#выход из акка
+@main_bp.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('username', None)
+    return redirect(url_for('main.login'))

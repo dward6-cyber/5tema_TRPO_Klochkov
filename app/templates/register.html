@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card card-body col-md-4 mx-auto mt-5">
+    <h4 class="text-center">Регистрация нового пользователя</h4>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Придумайте Логин</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Придумайте Пароль</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success w-100">Создать аккаунт</button>
+    </form>
+    <p class="text-center mt-3 small">Уже зарегистрированы? <a href="{{ url_for('main.login') }}">Войти</a></p>
+</div>
+{% endblock %}

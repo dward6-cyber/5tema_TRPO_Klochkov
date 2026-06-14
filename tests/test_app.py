@@ -19,12 +19,12 @@ def app():
 def client(app):
     return app.test_client()
 
-# 1. Тест главной страницы — код ответа 200
+#Тест главной страницы
 def test_index_page(client):
     response = client.get('/')
     assert response.status_code == 200
 
-# 2. Тест добавления объекта — проверка, что объект появляется в БД
+#Тест добавления объекта
 def test_add_trip(client, app):
     response = client.post('/trip/add', data={
         'name': 'Летний Сочи',
@@ -38,7 +38,7 @@ def test_add_trip(client, app):
         assert trip is not None
         assert trip.location == 'Сочи'
 
-# 3. Тест поиска/фильтрации — возвращаются только нужные записи
+#Тест поиска
 def test_search_filtration(client, app):
     with app.app_context():
         t1 = Trip(name='Поездка 1', dates='1-2', location='Алтай')
@@ -52,19 +52,19 @@ def test_search_filtration(client, app):
     assert 'Алтай' in html
     assert 'Байкал' not in html
 
-# 4. Тест обработки ошибки — 404 при обращении к несуществующему ID
+#Тест обработки ошибки
 def test_404_error(client):
     response = client.get('/trip/999')
     assert response.status_code == 404
 
-# 5. Тест на корректность данных — валидация отклоняет пустое поле
+#Тест на корректность данных
 def test_validation_empty_fields(client, app):
     response = client.post('/trip/add', data={
         'name': '',  # Пустое поле названия
         'dates': '10-20.08',
         'location': 'Москва'
     })
-    # Наш роут возвращает статус 400 на плохие данные
+
     assert response.status_code == 400
     
     with app.app_context():
