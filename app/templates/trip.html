@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h2>{{ trip.name }}</h2>
-            <p class="text-muted mb-0">📍 {{ trip.location }} | 📅 {{ trip.dates }}</p>
+            <p class="text-muted mb-0">📍{{ trip.location }} | 📅 {{ trip.dates }}</p>
             <h4 class="mt-2 text-success">Собрано вещей: {{ packed_items }} из {{ total_items }}</h4>
         </div>
         <div>
@@ -43,18 +43,27 @@
     </div>
 
     <div class="col-md-6">
-        <div class="card card-body">
-            <h5>Шаблонизатор (Творческая фича)</h5>
-            <p class="small text-muted">Вы можете скопировать все вещи из другого вашего путешествия в это, чтобы сэкономить время.</p>
-            <form action="{{ url_for('main.copy_template', trip_id=trip.id) }}" method="POST">
-                <div class="mb-3">
-                    <select name="from_trip_id" class="form-select" required>
-                        <option value="">Выберите поездку-донор...</option>
+        {% if all_other_trips %}
+            <div class="card card-body">
+                <h5>Шаблонизатор</h5>
+                <p class="small text-muted">Вы можете скопировать все вещи из другого вашего путешествия в это, чтобы сэкономить время.</p>
+                <form action="{{ url_for('main.copy_template', trip_id=trip.id) }}" method="POST">
+                    <div class="mb-3">
+                        <select name="from_trip_id" class="form-select" required>
+                            <option value="">Выберите другую поездку...</option>
+                            {% for other_trip in all_other_trips %}
+                                <option value="{{ other_trip.id }}">{{ other_trip.name }} (-> {{ other_trip.location }})</option>
+                            {% endfor %}
                         </select>
-                </div>
-                <button type="submit" class="btn btn-outline-info btn-sm">Скопировать список</button>
-            </form>
-        </div>
+                    </div>
+                    <button type="submit" class="btn btn-outline-info btn-sm">Скопировать список</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="card card-body border-dashed text-center py-4 text-muted">
+                <p class="mb-0">💡 Шаблонизатор станет доступен, когда вы создадите хотя бы ещё одно путешествие.</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
