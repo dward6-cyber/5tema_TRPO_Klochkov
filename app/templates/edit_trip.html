@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card card-body col-md-6 mx-auto">
+    <h4>Редактировать поездку</h4>
+    <form action="{{ url_for('main.edit_trip', trip_id=trip.id) }}" method="POST">
+        <div class="mb-3">
+            <label class="form-label">Название</label>
+            <input type="text" name="name" class="form-control" value="{{ trip.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Даты</label>
+            <input type="text" name="dates" class="form-control" value="{{ trip.dates }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Место назначения</label>
+            <input type="text" name="location" class="form-control" value="{{ trip.location }}" required>
+        </div>
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('main.trip_detail', trip_id=trip.id) }}" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card id="add-trip-card" class="card card-body">
+            <h5 class="card-title">Новое путешествие</h5>
+            <form action="{{ url_for('main.add_trip') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Название</label>
+                    <input type="text" name="name" class="form-content form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Даты</label>
+                    <input type="text" name="dates" class="form-control" placeholder="10.07 - 20.07" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Место назначения</label>
+                    <input type="text" name="location" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Создать чек-лист</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <form method="GET" action="{{ url_for('main.index') }}" class="d-flex mb-3">
+            <input type="text" name="search" class="form-control me-2" placeholder="Поиск по месту назначения..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-outline-secondary">Найти</button>
+        </form>
+
+        <div class="list-group">
+            {% for trip in trips %}
+                <a href="{{ url_for('main.trip_detail', trip_id=trip.id) }}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ trip.name }}</h5>
+                        <small class="text-muted">{{ trip.dates }}</small>
+                    </div>
+                    <p class="mb-1">📍 {{ trip.location }}</p>
+                    <small class="text-primary">Вещей в списке: {{ trip.items|length }}</small>
+                </a>
+            {% else %}
+                <p class="text-muted">Поездок пока нет. Самое время запланировать что-то крутое!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

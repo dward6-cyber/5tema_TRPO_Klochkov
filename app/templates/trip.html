@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card card-body mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2>{{ trip.name }}</h2>
+            <p class="text-muted mb-0">📍 {{ trip.location }} | 📅 {{ trip.dates }}</p>
+            <h4 class="mt-2 text-success">Собрано вещей: {{ packed_items }} из {{ total_items }}</h4>
+        </div>
+        <div>
+            <a href="{{ url_for('main.edit_trip', trip_id=trip.id) }}" class="btn btn-warning btn-sm">Редактировать</a>
+            <form action="{{ url_for('main.delete_trip', trip_id=trip.id) }}" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Удалить эту поездку?')">Удалить</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <h4>Чек-лист вещей</h4>
+        <ul class="list-group mb-3">
+            {% for item in trip.items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="{% if item.is_packed %}text-decoration-line-through text-muted{% endif %}">
+                        {{ item.name }}
+                    </span>
+                    <form action="{{ url_for('main.toggle_item', item_id=item.id) }}" method="POST">
+                        <button type="submit" class="btn {% if item.is_packed %}btn-secondary{% else %}btn-success{% endif %} btn-sm">
+                            {% if item.is_packed %}Распаковать{% else %}Собрано{% endif %}
+                        </button>
+                    </form>
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">Список пуст. Добавьте первую вещь!</li>
+            {% endfor %}
+        </ul>
+
+        <form action="{{ url_for('main.trip_detail', trip_id=trip.id) }}" method="POST" class="d-flex">
+            <input type="text" name="item_name" class="form-control me-2" placeholder="Например: Паспорт" required>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card card-body">
+            <h5>Шаблонизатор (Творческая фича)</h5>
+            <p class="small text-muted">Вы можете скопировать все вещи из другого вашего путешествия в это, чтобы сэкономить время.</p>
+            <form action="{{ url_for('main.copy_template', trip_id=trip.id) }}" method="POST">
+                <div class="mb-3">
+                    <select name="from_trip_id" class="form-select" required>
+                        <option value="">Выберите поездку-донор...</option>
+                        </select>
+                </div>
+                <button type="submit" class="btn btn-outline-info btn-sm">Скопировать список</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
